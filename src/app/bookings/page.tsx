@@ -47,8 +47,9 @@ export default function BookingsPage() {
     try {
       setLoading(true)
       const token = localStorage.getItem('adminToken')
+      const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3006'
 
-      const response = await fetch('http://localhost:3001/api/bookings/admin', {
+      const response = await fetch(`${baseUrl}/bookings`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -76,14 +77,30 @@ export default function BookingsPage() {
   const updateBookingStatus = async (bookingId: string, status: string) => {
     try {
       const token = localStorage.getItem('adminToken')
+      const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3006'
 
-      const response = await fetch(`http://localhost:3001/api/bookings/${bookingId}/status`, {
+      // Map status to correct endpoint
+      let endpoint: string
+      switch (status) {
+        case 'CONFIRMED':
+          endpoint = `${baseUrl}/bookings/${bookingId}/confirm`
+          break
+        case 'COMPLETED':
+          endpoint = `${baseUrl}/bookings/${bookingId}/complete`
+          break
+        case 'CANCELLED':
+          endpoint = `${baseUrl}/bookings/${bookingId}/cancel`
+          break
+        default:
+          throw new Error('Invalid status')
+      }
+
+      const response = await fetch(endpoint, {
         method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ status })
+        }
       })
 
       if (!response.ok) {
@@ -104,8 +121,9 @@ export default function BookingsPage() {
 
     try {
       const token = localStorage.getItem('adminToken')
+      const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3006'
 
-      const response = await fetch(`http://localhost:3001/api/bookings/${bookingId}`, {
+      const response = await fetch(`${baseUrl}/bookings/${bookingId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
